@@ -1,0 +1,34 @@
+{{- /*
+Renders the hreflang alternates of the current page for the head of the document:
+one link per indexable translation, the page itself included, plus x-default.
+
+Nothing is rendered when the page is not indexable or has no indexable translation,
+because an hreflang set with a single URL carries no information.
+
+Usage, in the head of your base template:
+
+  {{ partial "hreflang/links.html" . }}
+
+@context {page} .
+*/ -}}
+{{- $cfg := site.Params.hreflang | default dict -}}
+{{- $noindex := $cfg.noindexParam | default "noindex" -}}
+{{- if ne (index .Params $noindex) true -}}
+  {{- $alts := where (where (partial "hreflang/languages.html" .) "translated" true) "indexable" true -}}
+  {{- if gt (len $alts) 1 -}}
+    {{- range $alts }}
+<link rel="alternate" hreflang="{{ .hreflang }}" href="{{ .url }}">
+    {{- end -}}
+    {{- $x := $cfg.xDefault | default "" -}}
+    {{- if eq $x "default" -}}
+      {{- range hugo.Sites -}}
+        {{- if .Language.IsDefault -}}{{- $x = .Language.Name -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- with $x -}}
+      {{- range where $alts "name" . }}
+<link rel="alternate" hreflang="x-default" href="{{ .url }}">
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

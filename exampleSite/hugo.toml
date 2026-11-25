@@ -1,0 +1,21 @@
+baseURL = "https://example.org/"
+title = "Example Site"
+theme = "hugo-hreflang"
+themesDir = "../.."
+defaultContentLanguage = "en"
+disableKinds = ["taxonomy", "term", "rss", "sitemap"]
+
+[languages.en]
+  label = "English"
+  locale = "en-US"
+  weight = 1
+  contentDir = "content/en"
+[languages.es]
+  label = "Español"
+  locale = "es-ES"
+  weight = 2
+  contentDir = "content/es"
+[languages.fr]
+  label = "Français"
+  weight = 2
+  contentDir = "content/fr"

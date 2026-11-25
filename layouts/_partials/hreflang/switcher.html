@@ -1,0 +1,38 @@
+{{- /*
+Renders an accessible language switcher: a list of links, one per language, to the
+translation of the current page or, when there is none, to the language's home page.
+The current language is marked with aria-current and is not a link.
+
+Usage:
+
+  {{ partial "hreflang/switcher.html" . }}
+  {{ partial "hreflang/switcher.html" (dict "page" . "class" "lang-switcher" "label" "Language") }}
+
+For your own markup, use the data from partial "hreflang/languages.html".
+
+@context {page|dict} . A page, or a dict with "page", and optionally "class" and "label".
+*/ -}}
+{{- $page := . -}}
+{{- $class := "language-switcher" -}}
+{{- $label := "" -}}
+{{- if reflect.IsMap . -}}
+  {{- $page = .page -}}
+  {{- $class = .class | default $class -}}
+  {{- $label = .label | default "" -}}
+{{- end -}}
+{{- $langs := partial "hreflang/languages.html" $page -}}
+{{- if gt (len $langs) 1 -}}
+<nav class="{{ $class }}" aria-label="{{ $label | default (T "hreflangSwitcherLabel" | default "Language") }}">
+  <ul>
+    {{- range $langs }}
+    <li>
+      {{- if .current }}
+      <span lang="{{ .hreflang }}" aria-current="true">{{ .label }}</span>
+      {{- else }}
+      <a href="{{ .url }}" lang="{{ .hreflang }}" hreflang="{{ .hreflang }}">{{ .label }}</a>
+      {{- end }}
+    </li>
+    {{- end }}
+  </ul>
+</nav>
+{{- end -}}

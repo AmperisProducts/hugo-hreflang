@@ -1,0 +1,19 @@
+# Module configuration for hugo-hreflang.
+# Override any default under [params.hreflang] in your project configuration.
+
+[module.hugoVersion]
+  min = "0.158.0"
+
+[params.hreflang]
+  # Use the language locale (for example "en-US") as the hreflang value. When false,
+  # or when a language has no locale, the language key (for example "en") is used.
+  useLocale = true
+  # Target of the x-default alternate: "default" for the default language, a language
+  # key such as "en", or "" to omit it.
+  xDefault = "default"
+  # Front matter parameter that marks a page as not indexable. Such pages get no
+  # alternates and are not listed as an alternate of their translations.
+  noindexParam = "noindex"
+  # In the language switcher, link languages without a translation of the current
+  # page to their home page ("home"), or leave them out ("none").
+  switcherFallback = "home"

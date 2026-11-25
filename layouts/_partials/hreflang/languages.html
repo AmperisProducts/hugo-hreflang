@@ -1,0 +1,55 @@
+{{- /*
+Returns one entry per language of the project for the current page, in a stable
+order (the order of hugo.Sites: language weight, then language key).
+
+Each entry is a dict with:
+  name        language key, for example "en"
+  label       language label, for example "English"
+  hreflang    value for the hreflang attribute
+  url         URL of the translation, or of the language's home page when the page
+              has no translation in that language (see switcherFallback)
+  current     true for the language of the current page
+  translated  true when the URL points to a translation of the current page
+  indexable   false when the translation is marked as not indexable
+
+Languages without a translation are left out when switcherFallback is "none".
+Only sites of the current version and role are listed.
+
+@context {page} .
+@returns {slice}
+*/ -}}
+{{- $cfg := site.Params.hreflang | default dict -}}
+{{- $useLocale := ne $cfg.useLocale false -}}
+{{- $noindex := $cfg.noindexParam | default "noindex" -}}
+{{- $fallback := $cfg.switcherFallback | default "home" -}}
+{{- $byLang := dict -}}
+{{- range .AllTranslations -}}
+  {{- $byLang = merge $byLang (dict .Language.Name .) -}}
+{{- end -}}
+{{- /* Home pages of the current version and role, by language. */ -}}
+{{- $homes := dict -}}
+{{- range site.Home.AllTranslations -}}
+  {{- $homes = merge $homes (dict .Language.Name .) -}}
+{{- end -}}
+{{- $seen := dict -}}
+{{- $out := slice -}}
+{{- range hugo.Sites -}}
+  {{- $lang := .Language -}}
+  {{- if not (index $seen $lang.Name) -}}
+    {{- $seen = merge $seen (dict $lang.Name true) -}}
+    {{- $code := cond (and $useLocale (ne $lang.Locale "")) $lang.Locale $lang.Name -}}
+    {{- $entry := dict "name" $lang.Name "label" $lang.Label "hreflang" $code "current" (eq $lang.Name $.Language.Name) -}}
+    {{- with index $byLang $lang.Name -}}
+      {{- $entry = merge $entry (dict "url" .Permalink "translated" true "indexable" (ne (index .Params $noindex) true)) -}}
+      {{- $out = $out | append $entry -}}
+    {{- else -}}
+      {{- if eq $fallback "home" -}}
+        {{- with index $homes $lang.Name -}}
+          {{- $entry = merge $entry (dict "url" .Permalink "translated" false "indexable" true) -}}
+          {{- $out = $out | append $entry -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- return $out -}}
